@@ -23,9 +23,7 @@ which is fine, just outline what kind of data you would like it to contain. -->
 know everything in advance and that these details might change later) -->
 
 4a. Database Schema - 
-<object data="sprts2.pdf" type="application/pdf" width="400px" height="400px">
-    <embed src="sprts2.pdf">
-</object>        
+![alt text](http://url/to/img.png)      
 Pretty simple stuff. Had big ideas but keeping it simple for now. I'll list some of my grander ideas for the site at the end of this document
 
 4b. Potential API Issues - Well, most obvious issue is that it's freemium. After 500 GET requests in a month we'll have to wait til the next month to get up and running again. This probably won't be an issue but we'll see huh. Besides that, very straightforward so as long as the API is working, the site will be fine
