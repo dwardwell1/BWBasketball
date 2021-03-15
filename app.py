@@ -18,11 +18,11 @@ connect_db(app)
 @app.route('/')
 def home_page():
     """Render home page"""
-    all_odds = Odds.query.all()
-    return render_template("home.html", odds=all_odds['data'])
+    all_odds = Odds.query.get_or_404(1).spread
+    return render_template("home.html", odds=json.loads(all_odds))
 
 
 @app.route('/api/odds')
 def get_odds():
     all_odds = Odds.query.all()
-    return jsonify(all_odds)
+    return all_odds, 200
