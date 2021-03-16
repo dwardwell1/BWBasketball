@@ -8,13 +8,18 @@
 </head>
 <body>
     this is my capstone
-    <ul>
+
     {% for odd in odds.data %}
     <ul>
         <li>{{odd.teams}}</li>
+        {% for site in odd.sites %}
+        <ul>{{site.site_nice}}
+        <li>{{site.odds.h2h}}</li></ul>
+        {% endfor %}
+
     </ul>
       
     {% endfor %}
-</ul>
+
 </body>
 </html>

@@ -4,14 +4,7 @@ import requests
 from models import User, Team, FavTeam, Book, Odds
 from app import app, db
 
-api_key = 'bf680b61288fa7d775ca603ec2c246ae'
 
-odds_response = requests.get('https://api.the-odds-api.com/v3/odds', params={
-    'api_key': api_key,
-    'sport': 'basketball_nba',
-    'region': 'us',  # uk | us | eu | au
-    'mkt': 'h2h'  # h2h | spreads | totals
-})
 # Create all tables
 db.drop_all()
 db.create_all()
@@ -30,7 +23,7 @@ db.session.commit()
 
 t1 = Team(team_name='Atlanta Hawks')
 t2 = Team(team_name='Boston Celtics')
-t3 = Team(team_name='Brooklen Nets')
+t3 = Team(team_name='Brooklyn Nets')
 t4 = Team(team_name='Charlotte Hornets')
 t5 = Team(team_name='Chicago Bulls')
 t6 = Team(team_name='Cleveland Cavaliers')
@@ -41,7 +34,7 @@ t10 = Team(team_name='Golden State Warriors')
 t11 = Team(team_name='Houston Rockets')
 t12 = Team(team_name='Indiana Pacers')
 t13 = Team(team_name='Los Angeles Clippers')
-t14 = Team(team_name='Lost Angeles Lakers')
+t14 = Team(team_name='Los Angeles Lakers')
 t15 = Team(team_name='Memphis Grizzlies')
 t16 = Team(team_name='Miami Heat')
 t17 = Team(team_name='Milwaukee Bucks')
@@ -91,6 +84,19 @@ db.session.commit()
 
 """ Fetch Odds """
 
-odds = Odds(spread=odds_response.text)
-db.session.add(odds)
-db.session.commit()
+
+def new_odds():
+    api_key = 'bf680b61288fa7d775ca603ec2c246ae'
+
+    odds_response = requests.get('https://api.the-odds-api.com/v3/odds', params={
+        'api_key': api_key,
+        'sport': 'basketball_nba',
+        'region': 'us',  # uk | us | eu | au
+        'mkt': 'h2h'  # h2h | spreads | totals
+    })
+    odds = Odds(spread=odds_response.text)
+    db.session.add(odds)
+    db.session.commit()
+
+
+new_odds()

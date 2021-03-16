@@ -38,7 +38,7 @@ class Team(db.Model):
     team_url = db.Column(db.Text)
     picture_url = db.Column(db.Text,  unique=True)
     entries = db.Column(db.Integer)
-    totalOdds = db.Column(db.Float)
+    totalOdds = db.Column(db.Floaset)
 
 
 class FavTeam(db.Model):
