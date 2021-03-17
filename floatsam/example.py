@@ -604,3 +604,22 @@ results = [{'id': '7ebe085081aa2928392e2b7ef0da361c',
                        'last_update': 1615758779,
                        'odds': {'h2h': [1.72, 2.36], 'h2h_lay': [1.73, 2.4]}}],
             'sites_count': 17}]
+holder = []
+
+for games in results:
+    holder.append(games['sites'])
+
+game_one = holder[0]
+
+home_odds = []
+away_odds = []
+for game in holder:
+    for site in game:
+        hodds = {}
+        aodds = {}
+        hodds[site['site_key']] = site['odds']['h2h'][0]
+        aodds[site['site_key']] = site['odds']['h2h'][1]
+        sort_hodds = sorted(hodds.items(), key=lambda x: x[1], reverse=True)
+        sort_aodds = sorted(aodds.items(), key=lambda x: x[1], reverse=True)
+        home_odds.append(sort_hodds)
+        away_odds.append(aodds)

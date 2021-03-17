@@ -2,6 +2,7 @@ from flask import Flask, request, render_template,  redirect, flash, session, js
 import requests
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, Odds, User, Team, FavTeam, Book
+import re
 
 
 app = Flask(__name__)
@@ -43,10 +44,35 @@ def home_page():
     return render_template("home.html", odds=json.loads(all_odds))
 
 
+#########################################################
+# API logic
+
+
 @app.route('/api/odds')
-def get_odds():
-    all_odds = Odds.query.all()
-    return all_odds, 200
+def get_all_odds():
+    """ Get all odds JSON """
+    all_odds = Odds.query.get_or_404(1).spread
+    return jsonify(odds=all_odds)
+
+
+def capital_words_spaces(str1):
+    # move this function later
+    """ Seperate team url for API search """
+    return re.sub(r"(\w)([A-Z])", r"\1 \2", str1)
+
+
+@app.route('/api/odds/<team>')
+def get_team_odds(team):
+    """ Get specific teams odds for that slate of games """
+    team = capital_words_spaces(team)
+    all_odds = json.loads(Odds.query.get_or_404(1).spread)
+    for game in all_odds['data']:
+        if team in game['teams']:
+            return jsonify(game)
+    return jsonify('No games')
+
+###############################################################
+# Functions
 
 
 def add_avg_spread():
@@ -83,6 +109,57 @@ def add_avg_spread():
         db.session.commit()
 
 
-def test(int):
-    test = Team.query.get_or_404(int)
-    print(test.totalOdds)
+def avg_book_place():
+    """ Add ranking of books price for each game """
+    odds = json.loads(Odds.query.get_or_404(1).spread)['data']
+    holder = []
+    # split into invididual games, store in holder array
+    for games in odds:
+        holder.append(games['sites'])
+    # take individual games and iterate through each betting sight for the game, then seperate for and away odds
+    for game in holder:
+        hodds = {}
+        aodds = {}
+        for site in game:
+            hodds[site['site_key']] = site['odds']['h2h'][0]
+            aodds[site['site_key']] = site['odds']['h2h'][1]
+        sort_hodds = sorted(
+            hodds.items(), key=lambda x: x[1], reverse=True)
+        sort_aodds = sorted(
+            aodds.items(), key=lambda x: x[1], reverse=True)
+        # after making dictionary of an individual games home team odds for every sight, we sort those, then iterate through them to add their ranking to the DB
+        for site in sort_hodds:
+            rip = Book.query.filter(Book.book_name == site[0]).first()
+            print(rip)
+            if not rip.entries:
+                rip.entries = 0
+            if not rip.avg_odds_count:
+                rip.avg_odds_count = 0
+            rip.entries += 1
+            rip.avg_odds_count += sort_hodds.index(site)
+            # how can i make a unique placeholder to do one mass push to DB instead of 100 invidual pushes
+            db.session.add(rip)
+            db.session.commit()
+        for site in sort_aodds:
+            rip = Book.query.filter(Book.book_name == site[0]).first()
+            print(rip)
+            if not rip.entries:
+                rip.entries = 0
+            if not rip.avg_odds_count:
+                rip.avg_odds_count = 0
+            rip.entries += 1
+            rip.avg_odds_count += sort_aodds.index(site)
+            # how can i make a unique placeholder to do one mass push to DB instead of 100 invidual pushes
+            db.session.add(rip)
+            db.session.commit()
+
+
+def show_ranking():
+    """ Get data from DB to get current book rankings """
+    books = Book.query.all()
+    ranks = {}
+    for book in books:
+        if book.entries:
+            avg = book.avg_odds_count // book.entries
+            ranks[book.book_name] = avg
+    return ranks

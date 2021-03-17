@@ -38,7 +38,7 @@ class Team(db.Model):
     team_url = db.Column(db.Text)
     picture_url = db.Column(db.Text,  unique=True)
     entries = db.Column(db.Integer)
-    totalOdds = db.Column(db.Floaset)
+    totalOdds = db.Column(db.Float)
 
 
 class FavTeam(db.Model):
@@ -60,7 +60,8 @@ class Book(db.Model):
     book_name = db.Column(db.Text, nullable=False, unique=True)
     book_url = db.Column(db.Text)
     picture_url = db.Column(db.Text,  unique=True)
-    best_odds_count = db.Column(db.Integer)
+    avg_odds_count = db.Column(db.Integer)
+    entries = db.Column(db.Integer)
 
 
 class Odds(db.Model):

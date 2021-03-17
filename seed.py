@@ -78,8 +78,15 @@ b10 = Book(book_name='betmgm')
 b11 = Book(book_name='caesars')
 b12 = Book(book_name='mybookieag')
 b13 = Book(book_name='betfair')
+b14 = Book(book_name='lowvig')
+b15 = Book(book_name='betonlineag')
+b16 = Book(book_name='bookmaker')
+b17 = Book(book_name='bovada')
+b18 = Book(book_name='intertops')
 
-db.session.add_all([b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13])
+
+db.session.add_all([b1, b2, b3, b4, b5, b6, b7, b8, b9, b10,
+                    b11, b12, b13, b14, b15, b16, b17, b18])
 db.session.commit()
 
 """ Fetch Odds """
@@ -99,4 +106,4 @@ def new_odds():
     db.session.commit()
 
 
-new_odds()
+# new_odds()
