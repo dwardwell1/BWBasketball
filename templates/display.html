@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    
+      
+    
+
+
+<table class="table table-borderless table-hover" >
+    <thead>
+      <tr>
+        
+        <th scope="col">Home Team</th>
+        <th scope="col">Bookie</th>
+        <th scope="col">Away Team</th>
+      </tr>
+    </thead>
+    {% for odd in odds.data %}
+    <tbody>
+      <tr >
+        {% for pic in pics %} {% if pic.team_name == odd.teams[0] %}
+        <td>{{odd.teams[0]}} <img  src="{{pic.picture_url}}"  alt=""></td>{% endif %}{% endfor %}
+        <td>Tip 7:30</td>
+        {% for pic in pics %} {% if pic.team_name == odd.teams[1] %}
+        <td> <img src="{{pic.picture_url}}" alt=""> {{odd.teams[1]}}</td>{% endif %}{% endfor %}
+      </tr>
+      
+    </tbody>
+ {% for site in odd.sites %}
+      <tr class="bg-dark text-light">
+       
+        <td>{{site.odds.h2h[0]}}
+            {% if site.odds.h2h[0] == bestHome[odds.data.index(odd)] %}
+         <span class="badge badge-success ">Best Value</span></td>
+            {% endif %}
+            {% if site.odds.h2h[0] == worstHome[odds.data.index(odd)] %}
+         <span class="badge badge-danger ">Least Value</span></td>
+            {% endif %}
+        <td> <a class="btn btn-outline-dark text-light" href="https://mybookie.ag/sportsbook/">{{site.site_nice}}</a> </td>
+        <td>{{site.odds.h2h[1]}}
+            {% if site.odds.h2h[1] == bestAway[odds.data.index(odd)] %}
+            <span class="badge badge-success ">Best Value</span></td>
+               {% endif %}
+               {% if site.odds.h2h[1] == worstAway[odds.data.index(odd)] %}
+         <span class="badge badge-danger ">Least Value</span></td>
+            {% endif %}
+        </td>
+      </tr> {% endfor %}
+    
+    </tbody>
+    <br>
+    {% endfor %}
+  </table>
+
+  
+
+
+    {% endblock %}

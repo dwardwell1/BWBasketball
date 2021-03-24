@@ -33,6 +33,43 @@ def new_odds():
     db.session.add(odds)
     db.session.commit()
 
+
+def best_val(all_odds):
+    """ Make array of highest value odds for each game """
+    odds = json.loads(all_odds)
+    home_highs = []
+    away_highs = []
+    # iterate through games and sites, then append max value to placeholder lists
+    for game in odds['data']:
+        hodds = []
+        aodds = []
+        for site in game['sites']:
+            hodds.append(site['odds']['h2h'][0])
+            aodds.append(site['odds']['h2h'][1])
+        highest_home = max(hodds)
+        highest_away = max(aodds)
+        home_highs.append(highest_home)
+        away_highs.append(highest_away)
+    return home_highs, away_highs
+
+
+def low_val(all_odds):
+    """ Make array oflowest value odds for each game """
+    odds = json.loads(all_odds)
+    home_lows = []
+    away_lows = []
+    # iterate through games and sites, then append max value to placeholder lists
+    for game in odds['data']:
+        hodds = []
+        aodds = []
+        for site in game['sites']:
+            hodds.append(site['odds']['h2h'][0])
+            aodds.append(site['odds']['h2h'][1])
+        highest_home = min(hodds)
+        highest_away = min(aodds)
+        home_lows.append(highest_home)
+        away_lows.append(highest_away)
+    return home_lows, away_lows
 #########################################################
 # route logic
 
@@ -40,8 +77,24 @@ def new_odds():
 @app.route('/')
 def home_page():
     """Render home page"""
-    all_odds = Odds.query.get_or_404(1).spread
-    return render_template("home.html", odds=json.loads(all_odds))
+    count = Odds.query.count()
+    all_odds = Odds.query.get_or_404(count).spread
+    teams = Team.query.all()
+    return render_template("home.html", odds=json.loads(all_odds), pics=teams)
+
+
+@app.route('/odds')
+def odds_page():
+    """Render home page"""
+    count = Odds.query.count()
+    all_odds = Odds.query.get_or_404(count).spread
+    teams = Team.query.all()
+    best_home_values = best_val(all_odds)[0]
+    best_away_values = best_val(all_odds)[1]
+    worst_home_values = low_val(all_odds)[0]
+    worst_away_values = low_val(all_odds)[1]
+
+    return render_template("display.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values)
 
 
 #########################################################
@@ -110,6 +163,7 @@ def add_avg_spread():
 
 
 def avg_book_place():
+    # make this more efficient by doing avg rating within function and not adding each piece
     """ Add ranking of books price for each game """
     odds = json.loads(Odds.query.get_or_404(1).spread)['data']
     holder = []
@@ -163,3 +217,6 @@ def show_ranking():
             avg = book.avg_odds_count // book.entries
             ranks[book.book_name] = avg
     return ranks
+
+
+# test

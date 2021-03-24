@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block content %}
     this is my capstone
 
-    {% for odd in odds.data %}
-    <ul>
-        <li>{{odd.teams}}</li>
-        {% for site in odd.sites %}
-        <ul>{{site.site_nice}}
-        <li>{{site.odds.h2h}}</li></ul>
-        {% endfor %}
-
-    </ul>
-      
+    {% for pic in pics %}
+    <img src="{{pic}}" alt="">
+    {{pic.picture_url}}
     {% endfor %}
 
-</body>
-</html>
+    {% endblock %}
