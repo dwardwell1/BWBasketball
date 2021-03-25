@@ -3,6 +3,8 @@ import requests
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, Odds, User, Team, FavTeam, Book
 import re
+from sqlalchemy.exc import IntegrityError
+from forms import UserAddForm, LoginForm
 
 
 app = Flask(__name__)
@@ -32,6 +34,7 @@ def new_odds():
     odds = Odds(spread=odds_response.text)
     db.session.add(odds)
     db.session.commit()
+    return odds_response
 
 
 def best_val(all_odds):
@@ -96,6 +99,56 @@ def odds_page():
 
     return render_template("display.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values)
 
+
+@app.route('/signup', methods=["GET", "POST"])
+def add_user():
+    """Handle user signup.
+
+    Create new user and add to DB. Redirect to home page.
+
+    If form not valid, present form.
+
+    If the there already is a user with that username: flash message
+    and re-present form.
+    """
+    form = UserAddForm()
+
+    if form.validate_on_submit():
+        try:
+            if form.over21.data == False:
+                return render_template('home.html')
+            user = User.signup(
+                username=form.username.data,
+                password=form.password.data,
+                over21=form.over21.data)
+
+            db.session.commit()
+
+            favteam = FavTeam(
+                user_id=user.id,
+                team_id=form.fav_one.data
+            )
+            db.session.add(favteam)
+            if form.fav_two.data:
+                fav2 = FavTeam(
+                    user_id=user.id,
+                    team_id=form.fav_two.data)
+                db.session.add(fav2)
+            if form.fav_three.data:
+                fav3 = FavTeam(
+                    user_id=user.id,
+                    team_id=form.fav_three.data)
+                db.session.add(fav3)
+            db.session.commit()
+
+        except IntegrityError:
+            flash("Username already taken", 'danger')
+            return render_template('signup.html', form=form)
+
+        return redirect("/odds")
+
+    else:
+        return render_template('signup.html', form=form)
 
 #########################################################
 # API logic

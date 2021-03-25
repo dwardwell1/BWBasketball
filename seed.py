@@ -3,6 +3,8 @@ import json
 import requests
 from models import User, Team, FavTeam, Book, Odds
 from app import app, db
+from example import results, test
+from flask import jsonify
 
 
 # Create all tables
@@ -10,10 +12,10 @@ db.drop_all()
 db.create_all()
 
 """ Create USers """
-u1 = User(username='danny', email='dwardwell1@gmail.com',
+u1 = User(username='danny',
           password='faerts', over21=True)
-u2 = User(username='Laura', email='laura@gmail.com',
-          password='nope', over21=True)
+u2 = User(username='Laura',
+          password='nopers', over21=True)
 
 db.session.add_all([u1, u2])
 
@@ -119,6 +121,10 @@ db.session.add_all([b1, b2, b3, b4, b5, b6, b7, b8, b9, b10,
                     b11, b12, b13, b14, b15, b16, b17, b18])
 db.session.commit()
 
+
+odds = Odds(spread=test)
+db.session.add(odds)
+db.session.commit()
 """ Fetch Odds """
 
 
