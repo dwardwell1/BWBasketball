@@ -21,3 +21,11 @@ class LoginForm(FlaskForm):
     """ Login Form """
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[Length(min=6)])
+
+
+class EditUser(FlaskForm):
+    """ Form for editing user """
+    username = StringField('Username')
+    fav_one = SelectField('Favorite Team?', choices=teams)
+    fav_two = SelectField('Second Favorite?', choices=teams)
+    fav_three = SelectField('Third Favorite?', choices=teams)

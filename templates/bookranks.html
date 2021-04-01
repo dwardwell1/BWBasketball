@@ -1,0 +1,11 @@
+{% extends 'base.html'  %}
+
+{% block content %}
+<div class="container">
+ <ol>
+{% for rank in ranks %}
+<li>{{rank}}</li>
+{% endfor  %}
+</ol>       
+</div>
+{% endblock %}

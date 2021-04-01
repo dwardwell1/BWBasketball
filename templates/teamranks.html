@@ -1,0 +1,11 @@
+{% extends 'base.html'  %}
+
+{% block content %}
+<div class="container">
+ <ol class="mt-4">
+{% for team, value in teams.items() %}
+<li>{{team}} {{value}}</li>
+{% endfor  %}
+</ol>       
+</div>
+{% endblock %}

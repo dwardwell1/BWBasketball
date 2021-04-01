@@ -86,6 +86,9 @@ class FavTeam(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(
         'users.id', ondelete='cascade'))
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
+    teams = db.relationship('Team', backref='favTeam')
+
+# left off here to make easier relationship to pull up favorite teams! by name so not so many dbs!!!!!
 
 
 class Book(db.Model):

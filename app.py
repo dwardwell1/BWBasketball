@@ -1,11 +1,19 @@
-from flask import Flask, request, render_template,  redirect, flash, session, jsonify, json
+from flask import Flask, request, render_template,  redirect, flash, session, jsonify, json, g, session
 import requests
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, Odds, User, Team, FavTeam, Book
 import re
 from sqlalchemy.exc import IntegrityError
-from forms import UserAddForm, LoginForm
+from forms import *
+from funs import new_odds, best_val, low_val
+import time
+import datetime
 
+dt = datetime.datetime.now()
+# dt.strftime('%X')
+# datetime.datetime.utcfromtimestamp(1616890000)
+
+CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
 
@@ -18,86 +26,33 @@ debug = DebugToolbarExtension(app)
 
 connect_db(app)
 
-#########################################################
-# get new odds for now
+
+##############################################################################
+# User signup/login/logout
 
 
-def new_odds():
-    api_key = 'bf680b61288fa7d775ca603ec2c246ae'
+@app.before_request
+def add_user_to_g():
+    """If we're logged in, add curr user to Flask global."""
 
-    odds_response = requests.get('https://api.the-odds-api.com/v3/odds', params={
-        'api_key': api_key,
-        'sport': 'basketball_nba',
-        'region': 'us',  # uk | us | eu | au
-        'mkt': 'h2h'  # h2h | spreads | totals
-    })
-    odds = Odds(spread=odds_response.text)
-    db.session.add(odds)
-    db.session.commit()
-    return odds_response
+    if CURR_USER_KEY in session:
+        g.user = User.query.get(session[CURR_USER_KEY])
+
+    else:
+        g.user = None
 
 
-def best_val(all_odds):
-    """ Make array of highest value odds for each game """
-    odds = json.loads(all_odds)
-    home_highs = []
-    away_highs = []
-    # iterate through games and sites, then append max value to placeholder lists
-    for game in odds['data']:
-        hodds = []
-        aodds = []
-        for site in game['sites']:
-            hodds.append(site['odds']['h2h'][0])
-            aodds.append(site['odds']['h2h'][1])
-        highest_home = max(hodds)
-        highest_away = max(aodds)
-        home_highs.append(highest_home)
-        away_highs.append(highest_away)
-    return home_highs, away_highs
+def do_login(user):
+    """Log in user."""
+
+    session[CURR_USER_KEY] = user.id
 
 
-def low_val(all_odds):
-    """ Make array oflowest value odds for each game """
-    odds = json.loads(all_odds)
-    home_lows = []
-    away_lows = []
-    # iterate through games and sites, then append max value to placeholder lists
-    for game in odds['data']:
-        hodds = []
-        aodds = []
-        for site in game['sites']:
-            hodds.append(site['odds']['h2h'][0])
-            aodds.append(site['odds']['h2h'][1])
-        highest_home = min(hodds)
-        highest_away = min(aodds)
-        home_lows.append(highest_home)
-        away_lows.append(highest_away)
-    return home_lows, away_lows
-#########################################################
-# route logic
+def do_logout():
+    """Logout user."""
 
-
-@app.route('/')
-def home_page():
-    """Render home page"""
-    count = Odds.query.count()
-    all_odds = Odds.query.get_or_404(count).spread
-    teams = Team.query.all()
-    return render_template("home.html", odds=json.loads(all_odds), pics=teams)
-
-
-@app.route('/odds')
-def odds_page():
-    """Render home page"""
-    count = Odds.query.count()
-    all_odds = Odds.query.get_or_404(count).spread
-    teams = Team.query.all()
-    best_home_values = best_val(all_odds)[0]
-    best_away_values = best_val(all_odds)[1]
-    worst_home_values = low_val(all_odds)[0]
-    worst_away_values = low_val(all_odds)[1]
-
-    return render_template("display.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values)
+    if CURR_USER_KEY in session:
+        del session[CURR_USER_KEY]
 
 
 @app.route('/signup', methods=["GET", "POST"])
@@ -145,10 +100,167 @@ def add_user():
             flash("Username already taken", 'danger')
             return render_template('signup.html', form=form)
 
+        do_login(user)
+
         return redirect("/odds")
 
     else:
         return render_template('signup.html', form=form)
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    """Handle user login."""
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        user = User.authenticate(form.username.data,
+                                 form.password.data)
+
+        if user:
+            do_login(user)
+            flash(f"Hello, {user.username}!", "success")
+            return redirect("/")
+
+        flash("Invalid credentials.", 'danger')
+
+    return render_template('login.html', form=form)
+
+
+@app.route('/logout')
+def logout():
+    """Handle logout of user."""
+
+    do_logout()
+    flash(f"Goodbye!", "success")
+    return redirect("/")
+
+
+@app.route('/edit', methods=["GET", "POST"])
+def edit():
+    """ Edit Profile """
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/login")
+
+    user_id = g.user.id
+
+    form = EditUser(obj=g.user)
+
+    fav_teams = FavTeam.query.filter(FavTeam.user_id == user_id).all()
+
+    if form.validate_on_submit():
+        g.user.username = form.username.data
+        db.session.commit()
+        if fav_teams[0] and form.fav_one.data:
+            fav_teams[0].team_id = form.fav_one.data
+            db.session.commit()
+        elif form.fav_one.data:
+            favteam = FavTeam(
+                user_id=user_id,
+                team_id=form.fav_one.data
+            )
+            db.session.add(favteam)
+            db.session.commit()
+        if fav_teams[1] and form.fav_two.data:
+            fav_teams[1].team_id = form.fav_two.data
+            db.session.commit()
+        elif form.fav_two.data:
+            favteam2 = FavTeam(
+                user_id=user_id,
+                team_id=form.fav_two.data
+            )
+            db.session.add(favteam2)
+            db.session.commit()
+        if fav_teams[2] and form.fav_three.data:
+            fav_teams[2].team_id = form.fav_two.data
+            db.session.commit()
+        elif form.fav_three.data:
+            favteam3 = FavTeam(
+                user_id=user_id,
+                team_id=form.fav_three.data
+            )
+            db.session.add(favteam3)
+            db.session.commit()
+
+        return redirect('/myteams')
+
+    return render_template('edit.html', form=form)
+
+
+#########################################################
+# route logic
+
+
+@app.route('/')
+def home_page():
+    """Render home page"""
+    count = Odds.query.count()
+    all_odds = Odds.query.get_or_404(count).spread
+    teams = Team.query.all()
+    user = g.user
+    return render_template("home.html", odds=json.loads(all_odds), pics=teams, user=user)
+
+
+@app.route('/odds')
+def odds_page():
+    """Render home page"""
+    count = Odds.query.count()
+    all_odds = Odds.query.get_or_404(count).spread
+    teams = Team.query.all()
+    best_home_values = best_val(all_odds)[0]
+    best_away_values = best_val(all_odds)[1]
+    worst_home_values = low_val(all_odds)[0]
+    worst_away_values = low_val(all_odds)[1]
+
+    return render_template("display.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values)
+
+
+@app.route('/myteams')
+def team_odds():
+    """ API call to see just favorited Teams """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/login")
+
+    user_id = g.user.id
+    fav_teams = FavTeam.query.filter(FavTeam.user_id == user_id).all()
+    team_ids = []
+    for team in fav_teams:
+        team_ids.append(team.teams.team_name)
+    teams = Team.query.all()
+    count = Odds.query.count()
+    all_odds = Odds.query.get_or_404(count).spread
+    best_home_values = best_val(all_odds)[0]
+    best_away_values = best_val(all_odds)[1]
+    worst_home_values = low_val(all_odds)[0]
+    worst_away_values = low_val(all_odds)[1]
+    teams_playing = iterate_teams(all_odds)
+
+    return render_template("myteams.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values, teams=team_ids, playing=teams_playing)
+    # changing db relationbship so I can get team names to iterate through
+
+
+@app.route('/bookranks')
+def books_ranks():
+    """ Show Book Ranking """
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/login")
+
+    ranks = show_ranking()
+
+    return render_template('bookranks.html', ranks=ranks)
+
+
+@app.route('/teamranks')
+def team_ranks():
+    """ Show ranking of teams based on average spread """
+    ranked = rank_teams()
+
+    return render_template('teamranks.html', teams=ranked)
 
 #########################################################
 # API logic
@@ -184,7 +296,8 @@ def get_team_odds(team):
 def add_avg_spread():
     """ Iterate through odds data to pass onto teamdata base. 
     After enough time will show true average  """
-    odds = json.loads(Odds.query.get_or_404(1).spread)['data']
+    count = Odds.query.count()
+    odds = json.loads(Odds.query.get_or_404(count).spread)['data']
     for team in odds:
         hteam = team['teams'][0]
         ateam = team['teams'][1]
@@ -218,7 +331,8 @@ def add_avg_spread():
 def avg_book_place():
     # make this more efficient by doing avg rating within function and not adding each piece
     """ Add ranking of books price for each game """
-    odds = json.loads(Odds.query.get_or_404(1).spread)['data']
+    count = Odds.query.count()
+    odds = json.loads(Odds.query.get_or_404(count).spread)['data']
     holder = []
     # split into invididual games, store in holder array
     for games in odds:
@@ -235,30 +349,32 @@ def avg_book_place():
         sort_aodds = sorted(
             aodds.items(), key=lambda x: x[1], reverse=True)
         # after making dictionary of an individual games home team odds for every sight, we sort those, then iterate through them to add their ranking to the DB
-        for site in sort_hodds:
-            rip = Book.query.filter(Book.book_name == site[0]).first()
-            print(rip)
-            if not rip.entries:
-                rip.entries = 0
-            if not rip.avg_odds_count:
-                rip.avg_odds_count = 0
-            rip.entries += 1
-            rip.avg_odds_count += sort_hodds.index(site)
-            # how can i make a unique placeholder to do one mass push to DB instead of 100 invidual pushes
-            db.session.add(rip)
-            db.session.commit()
-        for site in sort_aodds:
-            rip = Book.query.filter(Book.book_name == site[0]).first()
-            print(rip)
-            if not rip.entries:
-                rip.entries = 0
-            if not rip.avg_odds_count:
-                rip.avg_odds_count = 0
-            rip.entries += 1
-            rip.avg_odds_count += sort_aodds.index(site)
-            # how can i make a unique placeholder to do one mass push to DB instead of 100 invidual pushes
-            db.session.add(rip)
-            db.session.commit()
+        if len(sort_hodds) > 5:
+            for site in sort_hodds:
+                rip = Book.query.filter(Book.book_name == site[0]).first()
+                print(rip)
+                if not rip.entries:
+                    rip.entries = 0
+                if not rip.avg_odds_count:
+                    rip.avg_odds_count = 0
+                rip.entries += 1
+                rip.avg_odds_count += sort_hodds.index(site)
+
+                db.session.add(rip)
+                db.session.commit()
+        if len(sort_aodds) > 5:
+            for site in sort_aodds:
+                rip = Book.query.filter(Book.book_name == site[0]).first()
+                print(rip)
+                if not rip.entries:
+                    rip.entries = 0
+                if not rip.avg_odds_count:
+                    rip.avg_odds_count = 0
+                rip.entries += 1
+                rip.avg_odds_count += sort_aodds.index(site)
+                # how can i make a unique placeholder to do one mass push to DB instead of 100 invidual pushes
+                db.session.add(rip)
+                db.session.commit()
 
 
 def show_ranking():
@@ -269,7 +385,35 @@ def show_ranking():
         if book.entries:
             avg = book.avg_odds_count // book.entries
             ranks[book.book_name] = avg
-    return ranks
+
+    return {k: v for k, v in sorted(ranks.items(), key=lambda item: item[1])}
 
 
 # test
+
+def iterate_teams(odds):
+    odds = json.loads(odds)['data']
+    teams_playing = []
+    for team in odds:
+        teams_playing.append(team['teams'][0])
+        teams_playing.append(team['teams'][1])
+    return teams_playing
+
+
+def rank_teams():
+    """ rank teams """
+    all_teams = Team.query.all()
+    hold = {}
+    for team in all_teams:
+        if team.entries:
+            hold[team.team_name] = team.totalOdds / team.entries
+    return {k: v for k, v in sorted(hold.items(), key=lambda item: item[1])}
+
+
+@app.context_processor
+def inject_today_date():
+    def get_time(game_time):
+        test = datetime.datetime.utcfromtimestamp(
+            game_time)
+        return datetime.datetime.fromtimestamp(game_time).strftime('%m-%d %H:%M')
+    return dict(get_time=get_time)

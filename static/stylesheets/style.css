@@ -2,3 +2,28 @@ img {
     width:35px;
     height: height 35px;
 }
+
+container {
+    margin: 0;
+    padding-top:0;
+}
+
+table {
+    margin-top:5px;
+    padding-top: 0;
+}
+
+
+
+
+
+body {
+    background-color: burlywood;
+    background-image: url('bg.png');
+    background-attachment: fixed;
+    
+}
+
+/* .mt-0 {
+    margin-top: -1.25rem !important;
+  } */

@@ -1,10 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-    this is my capstone
-
-    {% for pic in pics %}
-    <img src="{{pic}}" alt="">
-    {{pic.picture_url}}
-    {% endfor %}
-
+    
+{% if g.user %}
+   <p>Hellloo {{user.username}}</p> 
+   {% endif %}
+<h4>Welcome to the homepage. Sign up for all our features, otherwise, enjoy the stats</h4>
     {% endblock %}

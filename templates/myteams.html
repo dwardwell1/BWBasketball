@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-0 p-0">
-    
+<div class="container mt-0">
+      
+   {% for team in teams %}
+   {% if team not in playing %} 
+   <h2> No games scheduled for the {{team}} </h2> 
+   {% endif  %}
+   {% endfor %}
 
-<table class="table table-borderless table-hover mt-0 " >
+
+<table class="table table-borderless table-hover mt-0" >
     <thead>
       <tr>
         
@@ -12,7 +18,9 @@
         <th scope="col">Away Team</th>
       </tr>
     </thead>
+
     {% for odd in odds.data %}
+    {% if odd.teams[0] in teams or odd.teams[1] in teams  %}
     <tbody>
       <tr >
         {% for pic in pics %} {% if pic.team_name == odd.teams[0] %}
@@ -42,7 +50,12 @@
          <span class="badge badge-danger ">Least Value</span></td>
             {% endif %}
         </td>
-      </tr> {% endfor %}
+      </tr> 
+      {% endfor %}
+      {% else %}
+      
+      {% endif %}
+
     
     </tbody>
     <br>
@@ -52,6 +65,4 @@
   
 
 
-    {% endblock %}      
-    
-
+    {% endblock %}
