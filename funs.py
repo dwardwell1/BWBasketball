@@ -1,6 +1,7 @@
 from flask import request, json
 import requests
 from models import db, connect_db, Odds, User, Team, FavTeam, Book
+import config
 
 #########################################################
 # get new odds for now
@@ -10,7 +11,7 @@ def new_odds():
     api_key = 'bf680b61288fa7d775ca603ec2c246ae'
 
     odds_response = requests.get('https://api.the-odds-api.com/v3/odds', params={
-        'api_key': api_key,
+        'api_key': config.api_key,
         'sport': 'basketball_nba',
         'region': 'us',  # uk | us | eu | au
         'mkt': 'h2h'  # h2h | spreads | totals
