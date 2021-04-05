@@ -1,13 +1,16 @@
+from Capstone1.funs import add_avg_spread, avg_book_place
 from flask import Flask, request, render_template,  redirect, flash, session, jsonify, json, g, session
-import requests
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, Odds, User, Team, FavTeam, Book
 import re
 from sqlalchemy.exc import IntegrityError
 from forms import *
-from funs import new_odds, best_val, low_val
+from funs import *
 import time
+import atexit
 import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+
 
 dt = datetime.datetime.now()
 # dt.strftime('%X')
@@ -26,6 +29,17 @@ debug = DebugToolbarExtension(app)
 
 connect_db(app)
 
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(new_odds, 'interval', hours=24, id='new_odds')
+scheduler.add_job(add_avg_spread, 'interval',
+                  hours=24, minutes=1, id='avg_spread')
+scheduler.add_job(avg_book_place, 'interval',
+                  hours=24, minutes=3, id='avg_book')
+scheduler.start()
+# scheduler.remove_job('my_job_id')
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown())
 
 ##############################################################################
 # User signup/login/logout
@@ -71,6 +85,7 @@ def add_user():
     if form.validate_on_submit():
         try:
             if form.over21.data == False:
+                flash("I'd suggest waiting for a few years", 'danger')
                 return render_template('home.html')
             user = User.signup(
                 username=form.username.data,
@@ -79,11 +94,12 @@ def add_user():
 
             db.session.commit()
 
-            favteam = FavTeam(
-                user_id=user.id,
-                team_id=form.fav_one.data
-            )
-            db.session.add(favteam)
+            if form.fav_one.data:
+                favteam = FavTeam(
+                    user_id=user.id,
+                    team_id=form.fav_one.data
+                )
+                db.session.add(favteam)
             if form.fav_two.data:
                 fav2 = FavTeam(
                     user_id=user.id,
@@ -163,7 +179,7 @@ def edit():
             )
             db.session.add(favteam)
             db.session.commit()
-        if fav_teams[1] and form.fav_two.data:
+        if len(fav_teams) > 1 and form.fav_two.data:
             fav_teams[1].team_id = form.fav_two.data
             db.session.commit()
         elif form.fav_two.data:
@@ -173,8 +189,8 @@ def edit():
             )
             db.session.add(favteam2)
             db.session.commit()
-        if fav_teams[2] and form.fav_three.data:
-            fav_teams[2].team_id = form.fav_two.data
+        if len(fav_teams) > 2 and form.fav_three.data:
+            fav_teams[2].team_id = form.fav_three.data
             db.session.commit()
         elif form.fav_three.data:
             favteam3 = FavTeam(
@@ -209,12 +225,13 @@ def odds_page():
     count = Odds.query.count()
     all_odds = Odds.query.get_or_404(count).spread
     teams = Team.query.all()
+    books = Book.query.all()
     best_home_values = best_val(all_odds)[0]
     best_away_values = best_val(all_odds)[1]
     worst_home_values = low_val(all_odds)[0]
     worst_away_values = low_val(all_odds)[1]
 
-    return render_template("display.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values)
+    return render_template("display.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values, books=books)
 
 
 @app.route('/myteams')
@@ -251,16 +268,17 @@ def books_ranks():
         return redirect("/login")
 
     ranks = show_ranking()
-
-    return render_template('bookranks.html', ranks=ranks)
+    books = Book.query.all()
+    return render_template('bookranks.html', ranks=ranks, books=books)
 
 
 @app.route('/teamranks')
 def team_ranks():
     """ Show ranking of teams based on average spread """
     ranked = rank_teams()
+    teams = Team.query.all()
 
-    return render_template('teamranks.html', teams=ranked)
+    return render_template('teamranks.html', teams=ranked, pics=teams)
 
 #########################################################
 # API logic
@@ -291,123 +309,6 @@ def get_team_odds(team):
 
 ###############################################################
 # Functions
-
-
-def add_avg_spread():
-    """ Iterate through odds data to pass onto teamdata base. 
-    After enough time will show true average  """
-    count = Odds.query.count()
-    odds = json.loads(Odds.query.get_or_404(count).spread)['data']
-    for team in odds:
-        hteam = team['teams'][0]
-        ateam = team['teams'][1]
-        htotal = 0
-        atotal = 0
-        for site in team['sites']:
-            htotal += site['odds']['h2h'][0]
-            atotal += site['odds']['h2h'][1]
-        h_avg_total = round(htotal/len(team['sites']), 2)
-        a_avg_total = round(atotal/len(team['sites']), 2)
-        # psql storing ints not floats?
-        home = Team.query.filter(Team.team_name == hteam).first()
-        away = Team.query.filter(Team.team_name == ateam).first()
-        if not home.entries:
-            home.entries = 0
-        if not away.entries:
-            away.entries = 0
-        home.entries += 1
-        away.entries += 1
-        if not home.totalOdds:
-            home.totalOdds = 0
-        if not away.totalOdds:
-            away.totalOdds = 0
-        home.totalOdds += h_avg_total
-        away.totalOdds += a_avg_total
-
-        db.session.add_all([home, away])
-        db.session.commit()
-
-
-def avg_book_place():
-    # make this more efficient by doing avg rating within function and not adding each piece
-    """ Add ranking of books price for each game """
-    count = Odds.query.count()
-    odds = json.loads(Odds.query.get_or_404(count).spread)['data']
-    holder = []
-    # split into invididual games, store in holder array
-    for games in odds:
-        holder.append(games['sites'])
-    # take individual games and iterate through each betting sight for the game, then seperate for and away odds
-    for game in holder:
-        hodds = {}
-        aodds = {}
-        for site in game:
-            hodds[site['site_key']] = site['odds']['h2h'][0]
-            aodds[site['site_key']] = site['odds']['h2h'][1]
-        sort_hodds = sorted(
-            hodds.items(), key=lambda x: x[1], reverse=True)
-        sort_aodds = sorted(
-            aodds.items(), key=lambda x: x[1], reverse=True)
-        # after making dictionary of an individual games home team odds for every sight, we sort those, then iterate through them to add their ranking to the DB
-        if len(sort_hodds) > 5:
-            for site in sort_hodds:
-                rip = Book.query.filter(Book.book_name == site[0]).first()
-                print(rip)
-                if not rip.entries:
-                    rip.entries = 0
-                if not rip.avg_odds_count:
-                    rip.avg_odds_count = 0
-                rip.entries += 1
-                rip.avg_odds_count += sort_hodds.index(site)
-
-                db.session.add(rip)
-                db.session.commit()
-        if len(sort_aodds) > 5:
-            for site in sort_aodds:
-                rip = Book.query.filter(Book.book_name == site[0]).first()
-                print(rip)
-                if not rip.entries:
-                    rip.entries = 0
-                if not rip.avg_odds_count:
-                    rip.avg_odds_count = 0
-                rip.entries += 1
-                rip.avg_odds_count += sort_aodds.index(site)
-                # how can i make a unique placeholder to do one mass push to DB instead of 100 invidual pushes
-                db.session.add(rip)
-                db.session.commit()
-
-
-def show_ranking():
-    """ Get data from DB to get current book rankings """
-    books = Book.query.all()
-    ranks = {}
-    for book in books:
-        if book.entries:
-            avg = book.avg_odds_count // book.entries
-            ranks[book.book_name] = avg
-
-    return {k: v for k, v in sorted(ranks.items(), key=lambda item: item[1])}
-
-
-# test
-
-def iterate_teams(odds):
-    odds = json.loads(odds)['data']
-    teams_playing = []
-    for team in odds:
-        teams_playing.append(team['teams'][0])
-        teams_playing.append(team['teams'][1])
-    return teams_playing
-
-
-def rank_teams():
-    """ rank teams """
-    all_teams = Team.query.all()
-    hold = {}
-    for team in all_teams:
-        if team.entries:
-            hold[team.team_name] = team.totalOdds / team.entries
-    return {k: v for k, v in sorted(hold.items(), key=lambda item: item[1])}
 
 
 @app.context_processor

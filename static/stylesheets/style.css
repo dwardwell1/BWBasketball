@@ -11,9 +11,13 @@ container {
 table {
     margin-top:5px;
     padding-top: 0;
+    counter-reset: tableCount;  
 }
 
-
+.counterCell:before {              
+    content: counter(tableCount); 
+    counter-increment: tableCount; 
+}
 
 
 

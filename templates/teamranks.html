@@ -2,10 +2,39 @@
 
 {% block content %}
 <div class="container">
+    <h2>NBA Power Rankings</h2>
+<table class="table table-borderless table-striped table-hover  " >
+    <thead>
+      <tr>
+        
+        <th scope="col">Rank</th>
+        <th scope="col">Team</th>
+        <th scope="col">Avg. Odds</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for team, value in teams.items() %}
+        <tr class="bg-dark text-light" >
+            
+            <td class='counterCell'></td>
+            {% for pic in pics %} {% if pic.team_name == team %}
+            <td><img  src="{{pic.picture_url}}"  alt=""> {{team}} </td>
+            {% endif %}{% endfor %}
+            <td>{{value}}</td>
+          </tr>
+          {% endfor %}
+    </tbody>
+   </div> 
+</table>
+{% endblock %}
+            
+
+
+    
+    <!-- <div class="container">
  <ol class="mt-4">
 {% for team, value in teams.items() %}
 <li>{{team}} {{value}}</li>
 {% endfor  %}
 </ol>       
-</div>
-{% endblock %}
+</div> -->

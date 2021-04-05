@@ -28,7 +28,7 @@ t1 = Team(team_name='Atlanta Hawks',
 t2 = Team(team_name='Boston Celtics',
           picture_url='https://assets-sports.thescore.com/basketball/team/1/logo.png')
 t3 = Team(team_name='Brooklyn Nets',
-          picture_url="https://res-4.cloudinary.com/crunchbase-production/image/upload/c_lpad,h_256,w_256,f_auto,q_auto:eco/vesbufwtukzbvusjzvku")
+          picture_url="https://assets-sports.thescore.com/basketball/team/2/logo.png")
 t4 = Team(team_name='Charlotte Hornets',
           picture_url="https://basket88.com/wp-content/uploads/2019/10/charlotte-hornets-logo-128x128.png")
 t5 = Team(team_name='Chicago Bulls',
@@ -97,24 +97,43 @@ db.session.commit()
 
 """ Create Books """
 
-b1 = Book(book_name='pointsbetus')
-b2 = Book(book_name='fanduel')
-b3 = Book(book_name='williamhill_us')
-b4 = Book(book_name='foxbet')
-b5 = Book(book_name='gtbets')
-b6 = Book(book_name='unibet')
-b7 = Book(book_name='betrivers')
-b8 = Book(book_name='sugarhouse')
-b9 = Book(book_name='draftkings')
-b10 = Book(book_name='betmgm')
-b11 = Book(book_name='caesars')
-b12 = Book(book_name='mybookieag')
-b13 = Book(book_name='betfair')
-b14 = Book(book_name='lowvig')
-b15 = Book(book_name='betonlineag')
-b16 = Book(book_name='bookmaker')
-b17 = Book(book_name='bovada')
-b18 = Book(book_name='intertops')
+b1 = Book(book_name='pointsbetus',
+          book_url='https://nj.pointsbet.com/', book_nice='PointsBet')
+b2 = Book(book_name='fanduel',
+          book_url='https://sportsbook.fanduel.com/sports', book_nice='FanDuel')
+b3 = Book(book_name='williamhill_us',
+          book_url='https://www.williamhill.com/us/', book_nice='William Hill')
+b4 = Book(book_name='foxbet',
+          book_url='https://www.foxbet.com/?no_redirect=1', book_nice='FoxBet')
+b5 = Book(book_name='gtbets', book_url='https://m.gtbets.ag/', book_nice='GTBets')
+b6 = Book(book_name='unibet',
+          book_url='https://www.unibet.com/betting/sports/filter/basketball/nba', book_nice='UniBet')
+b7 = Book(book_name='betrivers',
+          book_url='https://www.betrivers.com/', book_nice='BetRivers')
+b8 = Book(book_name='sugarhouse',
+          book_url='https://www.playsugarhouse.com/', book_nice='SugarHouse')
+b9 = Book(book_name='draftkings',
+          book_url='https://sportsbook.draftkings.com/leagues/basketball/103?category=game-lines&subcategory=game', book_nice='DraftKings')
+b10 = Book(book_name='betmgm',
+           book_url='https://promo.nj.betmgm.com/en/promo/geolocator?orh=sports.betmgm.com', book_nice='BetMGM')
+b11 = Book(book_name='caesars',
+           book_url='https://www.caesarscasino.com/sports/', book_nice='Caesars')
+b12 = Book(book_name='mybookieag',
+           book_url='https://mybookie.ag/sportsbook/', book_nice='MyBookie.ag')
+b13 = Book(book_name='betfair',
+           book_url='https://www.betfair.com/sport/', book_nice='BetFair')
+b14 = Book(book_name='lowvig', book_url='https://www.lowvig.ag/',
+           book_nice='LowVig.ag')
+b15 = Book(book_name='betonlineag',
+           book_url='https://www.betonline.ag/sportsbook')
+b16 = Book(book_name='bookmaker',
+           book_url='https://www.bookmaker.eu/sportsbook',
+           book_nice='Bookmaker')
+b17 = Book(book_name='bovada',
+           book_url='https://www.bovada.lv/sports/basketball',
+           book_nice='Bovada')
+b18 = Book(book_name='intertops', book_url='https://sports.intertops.eu/',
+           book_nice='Intertops')
 
 
 db.session.add_all([b1, b2, b3, b4, b5, b6, b7, b8, b9, b10,

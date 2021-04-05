@@ -2,10 +2,39 @@
 
 {% block content %}
 <div class="container">
+    <h2>Sportsbook Power Rankings</h2>
+<table class="table table-borderless table-striped table-hover  " >
+    <thead>
+      <tr>
+        
+        <th scope="col">Rank</th>
+        <th scope="col">Book Name</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+        {% for rank in ranks %}
+        <tr class="bg-dark text-light" >
+            
+            <td class='counterCell'></td>
+            {% for book in books %} {% if rank == book.book_name %}
+            <td> <a class="btn btn-outline-dark text-light" href="{{book.book_url}}">{{book.book_nice}}</a> </td>
+            {% endif %}{% endfor %}
+            
+          </tr>
+          {% endfor %}
+    </tbody>
+   </div> 
+</table>
+{% endblock %}
+
+
+
+<div class="container">
+<h2>Sportsbook Power Rankings</h2>
  <ol>
 {% for rank in ranks %}
 <li>{{rank}}</li>
 {% endfor  %}
 </ol>       
 </div>
-{% endblock %}

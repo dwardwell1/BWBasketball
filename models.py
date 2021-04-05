@@ -99,7 +99,7 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     book_name = db.Column(db.Text, nullable=False, unique=True)
     book_url = db.Column(db.Text)
-    picture_url = db.Column(db.Text,  unique=True)
+    book_nice = db.Column(db.Text,  unique=True)
     avg_odds_count = db.Column(db.Integer)
     entries = db.Column(db.Integer)
 

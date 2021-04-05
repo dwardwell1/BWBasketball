@@ -33,7 +33,15 @@
             {% if site.odds.h2h[0] == worstHome[odds.data.index(odd)] %}
          <span class="badge badge-danger ">Least Value</span></td>
             {% endif %}
-        <td> <a class="btn btn-outline-dark text-light" href="https://mybookie.ag/sportsbook/">{{site.site_nice}}</a> </td>
+
+            
+        <td> 
+          {% for book in books %}{% if site.site_key == book.book_name %}
+          <a class="btn btn-outline-dark text-light" href="{{book.book_url}}">{{site.site_nice}}</a> 
+          {% endif %}{% endfor %}
+        </td>
+
+        
         <td>{{site.odds.h2h[1]}}
             {% if site.odds.h2h[1] == bestAway[odds.data.index(odd)] %}
             <span class="badge badge-success ">Best Value</span></td>

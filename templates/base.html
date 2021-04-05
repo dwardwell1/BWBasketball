@@ -22,7 +22,9 @@
 
 <!-- Background image -->
     <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="/odds">Betwell Basketball</a>
+        <a class="navbar-brand" href="/odds">
+          <img src="\static\stylesheets\smallLogo.png" width="30" height="30" alt="">
+          Betwell Basketball</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -74,10 +76,16 @@
           {% endif %}
         </div>
       </nav>
-   
-  {% block content %}
-  {% endblock %}
+      <div class="container" style="margin-top: 2em">
+        {% for category, msg in get_flashed_messages(with_categories=True) %}
+        <div class="alert alert-{{category}}">{{ msg }}</div>
+        {% endfor %}
+    
+        {% block content %}
+        {% endblock %}
+      </div>
+  
 
-
+ 
 </body>
 </html>
