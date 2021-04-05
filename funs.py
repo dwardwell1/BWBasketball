@@ -8,7 +8,6 @@ import config
 
 
 def new_odds():
-    api_key = 'bf680b61288fa7d775ca603ec2c246ae'
 
     odds_response = requests.get('https://api.the-odds-api.com/v3/odds', params={
         'api_key': config.api_key,
