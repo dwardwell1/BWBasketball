@@ -34,11 +34,11 @@ connect_db(app)
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(new_odds, 'interval', hours=24, id='new_odds')
+scheduler.add_job(new_odds, 'interval', minutes=5, id='new_odds')
 scheduler.add_job(add_avg_spread, 'interval',
-                  hours=24, minutes=1, id='avg_spread')
+                  minutes=6, id='avg_spread')
 scheduler.add_job(avg_book_place, 'interval',
-                  hours=24, minutes=3, id='avg_book')
+                  minutes=7, id='avg_book')
 scheduler.start()
 # scheduler.remove_job('my_job_id')
 # Shut down the scheduler when exiting the app
