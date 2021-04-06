@@ -9,7 +9,7 @@ def timed_job():
     new_odds()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=24)
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=2)
 def scheduled_job():
     print('This job is run every weekday at 5pm.')
 
