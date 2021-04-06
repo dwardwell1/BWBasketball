@@ -171,5 +171,5 @@ def rank_teams():
     hold = {}
     for team in all_teams:
         if team.entries:
-            hold[team.team_name] = team.totalOdds / team.entries
+            hold[team.team_name] = round(team.totalOdds / team.entries, 2)
     return {k: v for k, v in sorted(hold.items(), key=lambda item: item[1])}
