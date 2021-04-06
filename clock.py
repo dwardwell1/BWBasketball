@@ -4,8 +4,12 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job(new_odds, 'interval', minutes=3)
-@sched.scheduled_job('cron', day_of_week='mon-fri', hour=17)
+@sched.scheduled_job('interval', minutes=3)
+def timed_job():
+    new_odds()
+
+
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=24)
 def scheduled_job():
     print('This job is run every weekday at 5pm.')
 
