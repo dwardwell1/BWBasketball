@@ -1,8 +1,35 @@
 {% extends 'base.html' %}
 {% block content %}
     
-{% if g.user %}
-   <p>Hellloo {{user.username}}</p> 
-   {% endif %}
-<h4>Welcome to the homepage. Sign up for all our features, otherwise, enjoy the stats</h4>
+
+   <div id="intro" class="view">
+
+      <div class="mask rgba-black-strong">
+
+                <div class="container-fluid d-flex align-items-center justify-content-center h-100">
+
+                    <div class="row d-flex justify-content-center text-center">
+
+                        <div class="col-md-12">
+
+                            <!-- Heading -->
+                            <h2  class="display-4 font-weight-bold white-text pt-5 mb-2">Betwell Basketball Odds</h2>
+
+                            <!-- Divider -->
+                            <hr class="my-4">
+
+                            <!-- Description -->
+                            <h4 id='header' class="white-text my-4">Your one stop shop for seeing NBA odds for each major sportsbook</h4>
+                           <a href="/odds"> <button type="button" class="btn btn-success">See Odds<i class="fas fa-bullseye ml-2"></i></button></a>
+                            {% if not g.user %}
+                          <a href="/signup">  <button type="button" class="btn btn-danger">Sign up<i class="fa fa-book ml-2"></i></button></a>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+    
+    </div>
     {% endblock %}

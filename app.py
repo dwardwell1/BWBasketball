@@ -1,11 +1,12 @@
-from Capstone1.funs import add_avg_spread, avg_book_place
+
+
 from flask import Flask, request, render_template,  redirect, flash, session, jsonify, json, g, session
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, Odds, User, Team, FavTeam, Book
 import re
 from sqlalchemy.exc import IntegrityError
 from forms import *
-from funs import *
+from funs import iterate_teams, new_odds, best_val, low_val, add_avg_spread, avg_book_place, show_ranking, rank_teams
 import time
 import atexit
 import datetime
@@ -182,6 +183,9 @@ def edit():
         if len(fav_teams) > 1 and form.fav_two.data:
             fav_teams[1].team_id = form.fav_two.data
             db.session.commit()
+        elif len(fav_teams) > 1 and not form.fav_two.data:
+            db.session.delete(fav_teams[1])
+            db.session.commit()
         elif form.fav_two.data:
             favteam2 = FavTeam(
                 user_id=user_id,
@@ -191,6 +195,9 @@ def edit():
             db.session.commit()
         if len(fav_teams) > 2 and form.fav_three.data:
             fav_teams[2].team_id = form.fav_three.data
+            db.session.commit()
+        elif len(fav_teams) > 2 and not form.fav_three.data:
+            db.session.delete(fav_teams[2])
             db.session.commit()
         elif form.fav_three.data:
             favteam3 = FavTeam(
@@ -254,9 +261,10 @@ def team_odds():
     best_away_values = best_val(all_odds)[1]
     worst_home_values = low_val(all_odds)[0]
     worst_away_values = low_val(all_odds)[1]
-    teams_playing = iterate_teams(all_odds)
+    teams_playing = iterate_teams(all_odds),
+    books = Book.query.all()
 
-    return render_template("myteams.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values, teams=team_ids, playing=teams_playing)
+    return render_template("myteams.html", odds=json.loads(all_odds), pics=teams, bestHome=best_home_values, bestAway=best_away_values, worstHome=worst_home_values, worstAway=worst_away_values, teams=team_ids, playing=teams_playing, books=books)
     # changing db relationbship so I can get team names to iterate through
 
 
@@ -279,6 +287,12 @@ def team_ranks():
     teams = Team.query.all()
 
     return render_template('teamranks.html', teams=ranked, pics=teams)
+
+
+@app.route('/about')
+def about():
+    """ Contact info etc """
+    return render_template('about.html')
 
 #########################################################
 # API logic

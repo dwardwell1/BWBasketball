@@ -1,8 +1,12 @@
 {% extends 'base.html'  %}
 
 {% block content %}
-<div class="container">
-    <h2>NBA Power Rankings</h2>
+<div class="container-fluid d-flex align-items-center justify-content-center h-100">
+
+  <div class="row d-flex justify-content-center text-center">
+
+      <div class="col-md-12">
+        <h2  class="display-4 font-weight-bold white-text pt-5 mb-2">Team Power Rankings</h2>
 <table class="table table-borderless table-striped table-hover  " >
     <thead>
       <tr>
@@ -25,6 +29,9 @@
           {% endfor %}
     </tbody>
    </div> 
+  </div>
+</div>
+   
 </table>
 {% endblock %}
             

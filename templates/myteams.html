@@ -3,14 +3,18 @@
 <div class="container mt-0">
       
    {% for team in teams %}
-   {% if team not in playing %} 
-   <h2> No games scheduled for the {{team}} </h2> 
+   {% for play in playing %}
+   {% if team not in play %} 
+   
+   <h2 class="display-3">No games scheduled for the {{team}}</h2>
    {% endif  %}
    {% endfor %}
+   {% endfor %}
+   
 
 
 <table class="table table-borderless table-hover mt-0" >
-    <thead>
+    <thead class='head'>
       <tr>
         
         <th scope="col">Home Team</th>
@@ -22,7 +26,7 @@
     {% for odd in odds.data %}
     {% if odd.teams[0] in teams or odd.teams[1] in teams  %}
     <tbody>
-      <tr >
+      <tr class='teams' >
         {% for pic in pics %} {% if pic.team_name == odd.teams[0] %}
         <td>{{odd.teams[0]}} <img  src="{{pic.picture_url}}"  alt=""></td>{% endif %}{% endfor %}
         <td>Start {{get_time(odd.commence_time)}}</td>
@@ -41,10 +45,10 @@
             {% if site.odds.h2h[0] == worstHome[odds.data.index(odd)] %}
          <span class="badge badge-danger ">Least Value</span></td>
             {% endif %}
-        <td>
+        <td> 
             {% for book in books %}{% if site.site_key == book.book_name %}
-             <a class="btn btn-outline-dark text-light" href="{{book.book_url}}/">{{site.site_nice}}</a> 
-             {% endif %}{% endfor %}
+          <a class="btn btn-outline-dark text-light" href="{{book.book_url}}">{{site.site_nice}} </a> 
+          {% endif %}{% endfor %}
             </td>
         <td>{{site.odds.h2h[1]}}
             {% if site.odds.h2h[1] == bestAway[odds.data.index(odd)] %}

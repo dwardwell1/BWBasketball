@@ -10,7 +10,8 @@
   <script src="https://unpkg.com/jquery"></script>
   <script src="https://unpkg.com/popper"></script>
   <script src="https://unpkg.com/bootstrap"></script>
-
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:ital,wght@0,300;0,700;1,300&family=Russo+One&display=swap" rel="stylesheet">
   <link rel="stylesheet"
         href="https://use.fontawesome.com/releases/v5.3.1/css/all.css">
   <link rel="stylesheet" href="/static/stylesheets/style.css">
@@ -22,7 +23,7 @@
 
 <!-- Background image -->
     <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="/odds">
+        <a id="logo" class="navbar-brand" href="/odds">
           <img src="\static\stylesheets\smallLogo.png" width="30" height="30" alt="">
           Betwell Basketball</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,9 +44,7 @@
                 {% else %}
                 <a class="dropdown-item" href="/bookranks">Book Rankings</a>
                 <a class="dropdown-item" href="/teamranks">Team Rankings</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">Methodology</a>
-              </div>
+               
               {% endif %}
             </li>
             {% if not g.user %}
@@ -84,7 +83,16 @@
         {% block content %}
         {% endblock %}
       </div>
-  
+      
+      <footer class="footer">
+        <!-- Copyright -->
+        <div class="text-center " >
+          © 2021 Copyright:
+          WardwellMakes ||
+          <a class="text-dark" href="/about">About</a>
+        </div>
+        <!-- Copyright -->
+      </footer>
 
  
 </body>

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-0 text-center">
+<h4> First off, thanks for visiting my website!</h2>
+<p>This was my first attempt at a website I'm feeling pretty good about it. It was built using a Flask backend, and almost
+    completely in python from there. I used bcrypt for password security, jinja for the front end, SQLAlchemy for the database, and WTForms for ...the forms.
+    <br>
+    <br>
+        As for the odds, using the I used <a href="https://the-odds-api.com/">The Odds API</a> and made a call once daily at Midnight to gather the odds. Because it's freemium I decided to not make calls during the games so the odds will only be pre-tipoff. For the team rankings I averaged the head to head odds for each game throughout the season (data collection began 4/6/21).
+    For Book rankings I kept track of how often a book would have the best odds for each team for each game.
+    <br>
+    If you have any questions, comments, concerns, or advice, contact me at: 
+    <a href = "dwardwell1@gmail.com">dwardwell1@gmail.com</a>
+
+</p>
+
+</div>
+
+    {% endblock %}
