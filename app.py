@@ -11,6 +11,7 @@ import time
 import atexit
 import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+import os
 
 
 dt = datetime.datetime.now()
@@ -21,7 +22,9 @@ CURR_USER_KEY = "curr_user"
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///capstone'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL', 'postgres:///flask-heroku')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = "bbqchicken"

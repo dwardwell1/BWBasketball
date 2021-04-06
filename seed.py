@@ -8,7 +8,7 @@ from flask import jsonify
 
 
 # Create all tables
-
+db.drop_all()
 db.create_all()
 
 """ Create USers """
