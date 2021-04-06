@@ -1,7 +1,7 @@
 from flask import request, json
 import requests
 from models import db, connect_db, Odds, User, Team, FavTeam, Book
-import config
+# import config
 
 #########################################################
 # get new odds for now
