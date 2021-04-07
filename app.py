@@ -340,22 +340,22 @@ def inject_today_date():
     return dict(get_time=get_time)
 
 
-sched = BlockingScheduler()
+# sched = BlockingScheduler()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=10)
-def timed_job():
-    new_odds()
+# @sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=10)
+# def timed_job():
+#     new_odds()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=11)
-def scheduled_job():
-    add_avg_spread()
+# @sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=11)
+# def scheduled_job():
+#     add_avg_spread()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=12)
-def scheduled_job2():
-    avg_book_place()
+# @sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=12)
+# def scheduled_job2():
+#     avg_book_place()
 
 
-sched.start()
+# sched.start()
