@@ -13,14 +13,16 @@ def timed_job():
         new_odds()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=36)
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=55)
 def scheduled_job():
-    add_avg_spread()
+    with app.app_context():
+        add_avg_spread()
 
 
 @sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=7)
 def scheduled_job2():
-    avg_book_place()
+    with app.app_context():
+        avg_book_place()
 
 
 sched.start()
