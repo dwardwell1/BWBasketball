@@ -7,19 +7,19 @@ from app import app
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=51)
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=7)
 def timed_job():
     with app.app_context():
         new_odds()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=55)
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=7, minute=2)
 def scheduled_job():
     with app.app_context():
         add_avg_spread()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=7)
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=7, minute=5)
 def scheduled_job2():
     with app.app_context():
         avg_book_place()
