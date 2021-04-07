@@ -9,7 +9,8 @@ teams = [("", '--'), (1, 'Atlanta Hawks'), (2, 'Boston Celtics'), (3, 'Brooklyn 
 class UserAddForm(FlaskForm):
     """ Form For Adding Users """
 
-    username = StringField('Username', validators=[DataRequired()])
+    username = StringField('Username', validators=[
+                           DataRequired(), Length(max=18)])
     password = PasswordField('Password', validators=[Length(min=6)])
     over21 = BooleanField('Over 21?')
     fav_one = SelectField('Favorite Team?', choices=teams)

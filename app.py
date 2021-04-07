@@ -11,6 +11,7 @@ import time
 import atexit
 import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 import os
 
 
@@ -33,16 +34,37 @@ debug = DebugToolbarExtension(app)
 connect_db(app)
 
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(new_odds, 'interval', hours=22, id='new_odds')
-scheduler.add_job(add_avg_spread, 'interval',
-                  hours=22, minutes=6, id='avg_spread')
-scheduler.add_job(avg_book_place, 'interval',
-                  hours=22, minutes=7, id='avg_book')
-scheduler.start()
-# scheduler.remove_job('my_job_id')
-# Shut down the scheduler when exiting the app
-atexit.register(lambda: scheduler.shutdown())
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(new_odds, 'interval', hours=22, id='new_odds')
+# scheduler.add_job(add_avg_spread, 'interval',
+#                   hours=22, minutes=6, id='avg_spread')
+# scheduler.add_job(avg_book_place, 'interval',
+#                   hours=22, minutes=7, id='avg_book')
+# scheduler.start()
+# # scheduler.remove_job('my_job_id')
+# # Shut down the scheduler when exiting the app
+# atexit.register(lambda: scheduler.shutdown())
+
+sched = BlockingScheduler()
+
+
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=5)
+def timed_job():
+    new_odds()
+
+
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=6)
+def scheduled_job():
+    add_avg_spread()
+
+
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=7)
+def scheduled_job2():
+    avg_book_place()
+
+
+sched.start()
+
 
 ##############################################################################
 # User signup/login/logout
