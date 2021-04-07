@@ -6,9 +6,10 @@ from flask import current_app as app
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=35)
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=43)
 def timed_job():
-    new_odds()
+    with app.app_context():
+        new_odds()
 
 
 @sched.scheduled_job('cron', day_of_week='mon-sun', hour=9, minute=36)
