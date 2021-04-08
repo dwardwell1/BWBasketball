@@ -34,20 +34,6 @@ debug = DebugToolbarExtension(app)
 connect_db(app)
 
 
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(new_odds, 'interval', hours=22, id='new_odds')
-# scheduler.add_job(add_avg_spread, 'interval',
-#                   hours=22, minutes=6, id='avg_spread')
-# scheduler.add_job(avg_book_place, 'interval',
-#                   hours=22, minutes=7, id='avg_book')
-# scheduler.start()
-# # scheduler.remove_job('my_job_id')
-# # Shut down the scheduler when exiting the app
-# atexit.register(lambda: scheduler.shutdown())
-
-sched = BlockingScheduler()
-
-
 ##############################################################################
 # User signup/login/logout
 
@@ -174,6 +160,12 @@ def edit():
     fav_teams = FavTeam.query.filter(FavTeam.user_id == user_id).all()
 
     if form.validate_on_submit():
+        if form.fav_one.data == form.fav_two.data:
+            form.fav_two.data = ""
+        if form.fav_one.data == form.fav_three.data:
+            form.fav_three.data = ''
+        if form.fav_three.data == form.fav_two.data:
+            form.fav_three.data = ''
         g.user.username = form.username.data
         db.session.commit()
         if fav_teams[0] and form.fav_one.data:
