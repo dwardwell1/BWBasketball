@@ -19,7 +19,7 @@
       <tr class='teams' >
         {% for pic in pics %} {% if pic.team_name == odd.teams[0] %}
         <td>{{odd.teams[0]}} <img  src="{{pic.picture_url}}"  alt=""></td>{% endif %}{% endfor %}
-        <td class='start'>Start {{get_time(odd.commence_time)}}</td>
+        <td class='start'>Start {{get_time(odd.commence_time)}} EST</td>
         {% for pic in pics %} {% if pic.team_name == odd.teams[1] %}
         <td> <img src="{{pic.picture_url}}" alt=""> {{odd.teams[1]}}</td>{% endif %}{% endfor %}
       </tr>

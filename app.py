@@ -10,6 +10,7 @@ from funs import iterate_teams, new_odds, best_val, low_val, add_avg_spread, avg
 import time
 import atexit
 import datetime
+from datetime import timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 import os
@@ -326,9 +327,8 @@ def get_team_odds(team):
 @app.context_processor
 def inject_today_date():
     def get_time(game_time):
-        test = datetime.datetime.utcfromtimestamp(
-            game_time)
-        return datetime.datetime.fromtimestamp(game_time).strftime('%m-%d %H:%M')
+        time = datetime.datetime.fromtimestamp(game_time) - timedelta(hours=-7)
+        return time.strftime('%m-%d %H:%M')
     return dict(get_time=get_time)
 
 
